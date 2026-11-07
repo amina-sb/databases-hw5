@@ -1,0 +1,257 @@
+CSCI-UA 60 | Assignment 5 - SQL Queries
+Amina Salamatolla (as20312)
+Queries are in ASalamatolla-Assign5.sql. Output below is from running them in SQLite
+against the database built by unitedHelpers.sql.
+
+==============================================================================
+Question 1: How many containers of antibiotics are currently available?
+
+Output:
+antibioticsAvailable
+--------------------
+100
+
+Explanation:
+This finds the antibiotics row in the item table by matching the description
+with LIKE '%antibiotic%' rather than by its item ID, and returns its
+quantityOnHand, which is the number of bottles in stock.
+
+==============================================================================
+Question 2: Which volunteer(s), if any, have phone numbers that do not start
+with the number 2 and whose last name is not Jones?
+
+Output:
+volunteerName
+-------------
+Gene Lewin
+
+Explanation:
+This filters the volunteer table on three conditions. The phone number has to
+exist (Harry Smith and Joan Simmons have none on file, so they are left out),
+it can't begin with the digit 2, and the name can't end in " Jones". David
+Jones also has a 917 number but is removed by the last-name check, which
+leaves only Gene Lewin.
+
+==============================================================================
+Question 3: Which volunteer(s) are working on transporting tasks?
+
+Output:
+volunteerName
+-------------
+George Brewer
+
+Explanation:
+This follows volunteer -> assignment -> task -> task_type so each volunteer is
+linked to the type of every task they're on, then keeps only rows where the
+type is "transporting". DISTINCT means someone on two transporting tasks would
+still be listed once. There are two transporting tasks, but only "Transport
+packages to airport" has anyone assigned to it.
+
+==============================================================================
+Question 4: Which task(s) have yet to be assigned to any volunteers?
+
+Output:
+taskDescription
+------------------------------
+Prepare 100 food packages
+Take packages to the warehouse
+
+Explanation:
+The LEFT JOIN keeps every task, including tasks with no matching row in
+assignment. For those tasks the assignment columns come back as NULL, so
+filtering on a.taskCode IS NULL leaves just the tasks nobody has been assigned
+to.
+
+==============================================================================
+Question 5: Which type(s) of package contain some kind of bottle?
+
+Output:
+packageTypeName
+---------------
+food and water
+
+Explanation:
+This starts from items whose description contains "bottle" (the water bottle,
+aspirin and antibiotics) and works back through package_contents and package
+to the type of each package holding one of them. Only the water bottles were
+ever packed, and all five of those packages are "food and water", so DISTINCT
+reduces them to one row.
+
+==============================================================================
+Question 6: Which items, if any, are not in any packages?
+
+Output:
+itemDescription
+---------------------
+bottle of antibiotics
+bottle of aspirin
+flashlight
+pack of bandages
+
+Explanation:
+Same idea as Question 4. The LEFT JOIN keeps every item, and an item that was
+never put in a package has no row in package_contents, so its pc.itemId is
+NULL. Those four items are the result.
+
+==============================================================================
+Question 7: Which task(s) are assigned to volunteer(s) that live in New Jersey
+(NJ)?
+
+Output:
+taskDescription
+------------------------------
+Prepare 5,000 packages
+Prepare 20 children's packages
+Prepare 100 water packages
+Prepare 20 children's packages
+
+Explanation:
+The inner query collects the task codes of all assignments held by volunteers
+whose address ends in "NJ" (Joan Simmons, Chris Jordan and Gerry Banks; Sue
+Spencer lives in NJ but has no assignment). The outer query returns the
+description of each of those tasks. Because it uses IN, each task is listed
+once even when two NJ volunteers share it, as with task 103. "Prepare 20
+children's packages" shows up twice because it is the description of two
+separate tasks (103 and 108), not a repeated row. SELECT DISTINCT
+taskDescription would have merged them and hidden one of the tasks.
+
+==============================================================================
+Question 8: Which volunteers began their assignments in the first half of
+2021?
+
+Output:
+volunteerName
+-------------
+Joan Simmons
+Chris Jordan
+
+Explanation:
+This joins volunteers to their assignments and keeps assignments that started
+on or after January 1, 2021 and before July 1, 2021. I used < '2021-07-01'
+instead of BETWEEN ... AND '2021-06-30' because the dates are stored as text
+with a time, and '2021-06-30 09:00:00' sorts after '2021-06-30', so BETWEEN
+would miss anything starting on June 30. Assignments with no start time are
+NULL and drop out of the comparison. Both volunteers started task 103 on May
+1, 2021.
+
+==============================================================================
+Question 9: Which volunteers have been assigned to tasks that include packing
+spam?
+
+Output:
+volunteerName
+-------------
+Julie White
+Gerry Banks
+
+Explanation:
+This goes from the spam item through package_contents to the packages it was
+packed into, uses each package's taskCode to reach the assignments for that
+task, and then gets the names of those volunteers. Both spam packages were
+made for the same task, which has two volunteers, so without DISTINCT each
+name would appear twice.
+
+==============================================================================
+Question 10: Which item(s) (if any) have a total value of exactly $100 in one
+package?
+
+Output:
+itemDescription
+---------------
+Baby formula
+
+Explanation:
+For each row of package_contents, the item's unit value is multiplied by the
+quantity packed, and only rows that come to exactly 100 are kept. Baby formula
+qualifies (10 units at $10 in one package). The tent is worth $100 by itself,
+but two were packed together, so its total in that package is $200 and it is
+correctly left out.
+
+==============================================================================
+Question 11: How many volunteers are assigned to tasks with each different
+status? (highest to lowest)
+
+Output:
+taskStatus  numVolunteers
+----------  -------------
+open        4
+closed      3
+ongoing     2
+pending     1
+
+Explanation:
+Each assignment is linked to its task and then to the task's status, and the
+rows are grouped by status. COUNT(DISTINCT a.volunteerId) counts each
+volunteer only once per status. That matters for "closed": Chris Jordan is on
+two closed tasks, so a plain COUNT(*) would give 4 instead of 3. The groups
+are then sorted by the count, highest first.
+
+==============================================================================
+Question 12: Which task creates the heaviest set of packages and what is the
+weight?
+
+Output:
+taskCode  totalWeight
+--------  -----------
+106       308.0
+
+Explanation:
+This groups the packages by the task that produced them and adds up their
+weights, giving one total per task. Sorting those totals from heaviest to
+lightest and keeping the first row with LIMIT 1 gives the answer without a
+subquery. Task 106's three packages (103 + 102 + 103) weigh 308 in total.
+
+==============================================================================
+Question 13: How many tasks are there that do not have a type of "packing"?
+
+Output:
+nonPackingTasks
+---------------
+3
+
+Explanation:
+Each task is matched to its type name, every task whose type is anything other
+than "packing" is kept, and COUNT(*) returns how many there are: one recurring
+task and two transporting tasks.
+
+==============================================================================
+Question 14: Of those items that have been packed, which item (or items) were
+touched by fewer than 3 volunteers?
+
+Output:
+itemDescription
+---------------
+can of spam
+dried fruit
+men's coat
+sleeping bag
+tent
+women's coat
+
+Explanation:
+This links each packed item to the packages it is in, then to the task each
+package was made for, then to the volunteers assigned to that task. Grouping
+by item and counting distinct volunteer IDs gives the number of different
+people who handled each item, and HAVING keeps items with fewer than 3.
+Assignment is LEFT JOINed so a packed item whose task had no volunteers would
+still appear with a count of 0 instead of vanishing. The water bottles (3
+volunteers) and baby formula (4) are the packed items that don't qualify.
+
+==============================================================================
+Question 15: Which packages have a total value of more than 100? (lowest to
+highest)
+
+Output:
+packageId  packageValue
+---------  ------------
+6          150.0
+2          151.0
+4          350.0
+10         750.0
+5          1420.0
+
+Explanation:
+For each package, every item's quantity is multiplied by its value and the
+results are added up to get the package's total value. HAVING keeps only
+totals above 100 (package 3 is worth exactly 100, so it is excluded), and
+ORDER BY packageValue ASC lists them from lowest to highest.
