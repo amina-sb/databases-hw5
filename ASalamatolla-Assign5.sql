@@ -1,4 +1,4 @@
--- CSCI-UA 60 | Assignment 5 - SQL Queries
+-- Assignment 5 - SQL Queries
 -- Amina Salamatolla (as20312)
 -- Run against the United Helpers database created by unitedHelpers.sql (SQLite).
 
@@ -71,7 +71,7 @@ WHERE pc.itemId IS NULL;
 
 
 -- Question 7
--- Which task(s) are assigned to volunteer(s) that live in New Jersey (NJ)?
+-- Which task(s) are assigned to volunteer(s) that live in New Jersey ?
 -- Note: tasks 103 and 108 are two different tasks that share the same
 -- description, so that description appears twice (once per task).
 SELECT
