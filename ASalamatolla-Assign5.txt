@@ -27,9 +27,9 @@ Gene Lewin
 
 Explanation:
 This filters the volunteer table on three conditions. The phone number has to
-exist (Harry Smith and Joan Simmons have none on file, so they are left out),
-it can't begin with the digit 2, and the name can't end in " Jones". David
-Jones also has a 917 number but is removed by the last-name check, which
+exist: Harry Smith and Joan Simmons have none on file, so they are left out,
+it can not begin with the digit 2, and the name can not end in " Jones". David
+Jones also has a 917 number but is removed by the last name check, which
 leaves only Gene Lewin.
 
 ==============================================================================
@@ -42,7 +42,7 @@ George Brewer
 
 Explanation:
 This follows volunteer -> assignment -> task -> task_type so each volunteer is
-linked to the type of every task they're on, then keeps only rows where the
+linked to the type of every task they are on, then keeps only rows where the
 type is "transporting". DISTINCT means someone on two transporting tasks would
 still be listed once. There are two transporting tasks, but only "Transport
 packages to airport" has anyone assigned to it.
@@ -71,11 +71,11 @@ packageTypeName
 food and water
 
 Explanation:
-This starts from items whose description contains "bottle" (the water bottle,
-aspirin and antibiotics) and works back through package_contents and package
+This starts from items whose description contains "bottle" like the water bottle,
+aspirin or like antibiotics, and works back through package_contents and package
 to the type of each package holding one of them. Only the water bottles were
 ever packed, and all five of those packages are "food and water", so DISTINCT
-reduces them to one row.
+reduces them to one row likely.
 
 ==============================================================================
 Question 6: Which items, if any, are not in any packages?
@@ -89,9 +89,9 @@ flashlight
 pack of bandages
 
 Explanation:
-Same idea as Question 4. The LEFT JOIN keeps every item, and an item that was
+Same idea as Q4. The LEFT JOIN keeps every item, and an item that was
 never put in a package has no row in package_contents, so its pc.itemId is
-NULL. Those four items are the result.
+NULL. The result is those four items.
 
 ==============================================================================
 Question 7: Which task(s) are assigned to volunteer(s) that live in New Jersey
@@ -107,12 +107,12 @@ Prepare 20 children's packages
 
 Explanation:
 The inner query collects the task codes of all assignments held by volunteers
-whose address ends in "NJ" (Joan Simmons, Chris Jordan and Gerry Banks; Sue
-Spencer lives in NJ but has no assignment). The outer query returns the
+whose address ends in "NJ" like Joan Simmons, Chris Jordan and Gerry Banks. Sue
+Spencer lives in NJ but has no assignment. The outer query returns the
 description of each of those tasks. Because it uses IN, each task is listed
 once even when two NJ volunteers share it, as with task 103. "Prepare 20
 children's packages" shows up twice because it is the description of two
-separate tasks (103 and 108), not a repeated row. SELECT DISTINCT
+separate tasks which is 103 and 108, not a repeated row. SELECT DISTINCT
 taskDescription would have merged them and hidden one of the tasks.
 
 ==============================================================================
@@ -127,9 +127,9 @@ Chris Jordan
 
 Explanation:
 This joins volunteers to their assignments and keeps assignments that started
-on or after January 1, 2021 and before July 1, 2021. I used < '2021-07-01'
-instead of BETWEEN ... AND '2021-06-30' because the dates are stored as text
-with a time, and '2021-06-30 09:00:00' sorts after '2021-06-30', so BETWEEN
+on or after January 1, 2021 and before July 1, 2021. I used '2021-07-01'
+instead of BETWEEN - AND '2021-06-30' because the dates are stored as text
+with a time, and '2021-06-30 09:00' sorts after '2021-06-30', so BETWEEN
 would miss anything starting on June 30. Assignments with no start time are
 NULL and drop out of the comparison. Both volunteers started task 103 on May
 1, 2021.
@@ -145,7 +145,7 @@ Julie White
 Gerry Banks
 
 Explanation:
-This goes from the spam item through package_contents to the packages it was
+This goes from the spam item i guess through package_contents to the packages it was
 packed into, uses each package's taskCode to reach the assignments for that
 task, and then gets the names of those volunteers. Both spam packages were
 made for the same task, which has two volunteers, so without DISTINCT each
@@ -163,7 +163,7 @@ Baby formula
 Explanation:
 For each row of package_contents, the item's unit value is multiplied by the
 quantity packed, and only rows that come to exactly 100 are kept. Baby formula
-qualifies (10 units at $10 in one package). The tent is worth $100 by itself,
+qualifies 10 units at $10 in one package. The tent is worth $100 by itself,
 but two were packed together, so its total in that package is $200 and it is
 correctly left out.
 
@@ -199,7 +199,7 @@ Explanation:
 This groups the packages by the task that produced them and adds up their
 weights, giving one total per task. Sorting those totals from heaviest to
 lightest and keeping the first row with LIMIT 1 gives the answer without a
-subquery. Task 106's three packages (103 + 102 + 103) weigh 308 in total.
+subquery. Task 106 three packages (103 + 102 + 103) weigh 308 in total.
 
 ==============================================================================
 Question 13: How many tasks are there that do not have a type of "packing"?
@@ -234,8 +234,8 @@ package was made for, then to the volunteers assigned to that task. Grouping
 by item and counting distinct volunteer IDs gives the number of different
 people who handled each item, and HAVING keeps items with fewer than 3.
 Assignment is LEFT JOINed so a packed item whose task had no volunteers would
-still appear with a count of 0 instead of vanishing. The water bottles (3
-volunteers) and baby formula (4) are the packed items that don't qualify.
+still appear with a count of 0 instead of vanishing. The water bottles like 3
+volunteers and baby formula 4 are the packed items that do not qualify.
 
 ==============================================================================
 Question 15: Which packages have a total value of more than 100? (lowest to
@@ -253,5 +253,5 @@ packageId  packageValue
 Explanation:
 For each package, every item's quantity is multiplied by its value and the
 results are added up to get the package's total value. HAVING keeps only
-totals above 100 (package 3 is worth exactly 100, so it is excluded), and
+totals above 100 which is package 3 is worth exactly 100, so it is excluded, and
 ORDER BY packageValue ASC lists them from lowest to highest.
