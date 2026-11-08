@@ -75,7 +75,7 @@ This starts from items whose description contains "bottle" like the water bottle
 aspirin or like antibiotics, and works back through package_contents and package
 to the type of each package holding one of them. Only the water bottles were
 ever packed, and all five of those packages are "food and water", so DISTINCT
-reduces them to one row likely.
+reduces them to one row.
 
 ==============================================================================
 Question 6: Which items, if any, are not in any packages?
@@ -145,7 +145,7 @@ Julie White
 Gerry Banks
 
 Explanation:
-This goes from the spam item i guess through package_contents to the packages it was
+This goes from the spam item through package_contents to the packages it was
 packed into, uses each package's taskCode to reach the assignments for that
 task, and then gets the names of those volunteers. Both spam packages were
 made for the same task, which has two volunteers, so without DISTINCT each
